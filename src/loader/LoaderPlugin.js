@@ -194,7 +194,8 @@ var LoaderPlugin = new Class({
             GetFastValue(sceneConfig, 'async', gameConfig.loaderAsync),
             GetFastValue(sceneConfig, 'user', gameConfig.loaderUser),
             GetFastValue(sceneConfig, 'password', gameConfig.loaderPassword),
-            GetFastValue(sceneConfig, 'timeout', gameConfig.loaderTimeout)
+            GetFastValue(sceneConfig, 'timeout', gameConfig.loaderTimeout),
+            GetFastValue(sceneConfig, 'withCredentials', gameConfig.loaderWithCredentials)
         );
 
         /**
@@ -367,7 +368,7 @@ var LoaderPlugin = new Class({
      *
      * @param {string} [url] - The URL to use. Leave empty to reset.
      *
-     * @return {Phaser.Loader.LoaderPlugin} This Loader object.
+     * @return {this} This Loader object.
      */
     setBaseURL: function (url)
     {
@@ -407,7 +408,7 @@ var LoaderPlugin = new Class({
      *
      * @param {string} [path] - The path to use. Leave empty to reset.
      *
-     * @return {Phaser.Loader.LoaderPlugin} This Loader object.
+     * @return {this} This Loader object.
      */
     setPath: function (path)
     {
@@ -436,7 +437,7 @@ var LoaderPlugin = new Class({
      *
      * @param {string} [prefix] - The prefix to use. Leave empty to reset.
      *
-     * @return {Phaser.Loader.LoaderPlugin} This Loader object.
+     * @return {this} This Loader object.
      */
     setPrefix: function (prefix)
     {
@@ -462,7 +463,7 @@ var LoaderPlugin = new Class({
      *
      * @param {string} [crossOrigin] - The value to use for the `crossOrigin` property in the load request.
      *
-     * @return {Phaser.Loader.LoaderPlugin} This Loader object.
+     * @return {this} This Loader object.
      */
     setCORS: function (crossOrigin)
     {
@@ -951,7 +952,7 @@ var LoaderPlugin = new Class({
      * @param {*} data - The JSON data, ready parsed.
      * @param {string} [filename=file.json] - The name to save the JSON file as.
      *
-     * @return {Phaser.Loader.LoaderPlugin} This Loader plugin.
+     * @return {this} This Loader plugin.
      */
     saveJSON: function (data, filename)
     {
@@ -971,7 +972,7 @@ var LoaderPlugin = new Class({
      * @param {string} [filename=file.json] - The filename to save the file as.
      * @param {string} [filetype=application/json] - The file type to use when saving the file. Defaults to JSON.
      *
-     * @return {Phaser.Loader.LoaderPlugin} This Loader plugin.
+     * @return {this} This Loader plugin.
      */
     save: function (data, filename, filetype)
     {
