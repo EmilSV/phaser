@@ -26,6 +26,10 @@ var Vector2 = require('../../math/Vector2');
  *
  * The position of the Game Object automatically becomes relative to the position of the Container.
  *
+ * The origin of a Container is 0x0 (in local space) and that cannot be changed. The children you add to the
+ * Container should be positioned with this value in mind. I.e. you should treat 0x0 as being the center of
+ * the Container, and position children positively and negative around it as required.
+ *
  * When the Container is rendered, all of its children are rendered as well, in the order in which they exist
  * within the Container. Container children can be repositioned using methods such as `MoveUp`, `MoveDown` and `SendToBack`.
  *
@@ -384,12 +388,21 @@ var Container = new Class({
 
         output.setTo(this.x, this.y, 0, 0);
 
+        if (this.parentContainer)
+        {
+            var parentMatrix = this.parentContainer.getBoundsTransformMatrix();
+            var transformedPosition = parentMatrix.transformPoint(this.x, this.y);
+            output.setTo(transformedPosition.x, transformedPosition.y, 0, 0);
+        }
+
         if (this.list.length > 0)
         {
             var children = this.list;
             var tempRect = new Rectangle();
 
-            for (var i = 0; i < children.length; i++)
+            var firstChildBounds = children[0].getBounds();
+            output.setTo(firstChildBounds.x, firstChildBounds.y, firstChildBounds.width, firstChildBounds.height);
+            for (var i = 1; i < children.length; i++)
             {
                 var entry = children[i];
 
@@ -468,7 +481,11 @@ var Container = new Class({
 
         if (this.parentContainer)
         {
-            return this.parentContainer.pointToContainer(source, output);
+            this.parentContainer.pointToContainer(source, output);
+        }
+        else
+        {
+            output = new Vector2(source.x, source.y);
         }
 
         var tempMatrix = this.tempTransformMatrix;
