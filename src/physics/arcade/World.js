@@ -1962,7 +1962,7 @@ var World = new Class({
         var len;
         var bodyB;
 
-        if (this.useTree)
+        if (this.useTree || group.physicsType === CONST.STATIC_BODY)
         {
             var minMax = this.treeMinMax;
 
