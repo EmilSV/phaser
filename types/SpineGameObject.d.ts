@@ -1,7 +1,8 @@
 /// <reference path="./spine.d.ts" />
 /// <reference path="./SpinePlugin.d.ts" />
 
-declare class SpineGameObject extends Phaser.GameObjects.GameObject implements Omit<Phaser.GameObjects.Components.ComputedSize, 'setSize'>, Phaser.GameObjects.Components.Depth, Phaser.GameObjects.Components.Flip, Phaser.GameObjects.Components.ScrollFactor, Phaser.GameObjects.Components.Transform, Phaser.GameObjects.Components.Visible {
+declare class SpineGameObject extends Phaser.GameObjects.GameObject implements Omit<Phaser.GameObjects.Components.ComputedSize, 'setSize'>, Phaser.GameObjects.Components.Depth, Phaser.GameObjects.Components.Flip, Phaser.GameObjects.Components.ScrollFactor, Phaser.GameObjects.Components.Transform, Phaser.GameObjects.Components.Visible
+{
     constructor(scene: Phaser.Scene, pluginManager: SpinePlugin, x: number, y: number, key?: string, animationName?: string, loop?: boolean);
 
     alpha: number;
@@ -27,8 +28,8 @@ declare class SpineGameObject extends Phaser.GameObjects.GameObject implements O
     root: spine.Bone;
     rotation: number;
     scale: number;
-    scaleX: number
-    scaleY: number
+    scaleX: number;
+    scaleY: number;
     scrollFactorX: number;
     scrollFactorY: number;
     skeleton: spine.Skeleton;
@@ -98,7 +99,7 @@ declare class SpineGameObject extends Phaser.GameObjects.GameObject implements O
     setScale(x: number, y?: number): this;
     setScrollFactor(x: number, y?: number): this;
     setSize(width?: number, height?: number, offsetX?: number, offsetY?: number): SpineGameObject;
-    setSkeleton(atlasDataKey: string, skeletonJSON: object, animationName?: string, loop?: boolean): SpineGameObject;
+    setSkeleton(atlasDataKey: string, animationName?: string, loop?: boolean, skeletonJSON?: object): SpineGameObject;
     setSkeletonFromJSON(atlasDataKey: string, skeletonJSON: object, animationName?: string, loop?: boolean): SpineGameObject;
     setSkin(newSkin: spine.Skin): SpineGameObject;
     setSkinByName(skinName: string): SpineGameObject;
@@ -115,7 +116,8 @@ declare class SpineGameObject extends Phaser.GameObjects.GameObject implements O
     willRender(): boolean;
 }
 
-declare interface SpineGameObjectConfig extends Phaser.Types.GameObjects.GameObjectConfig {
+declare interface SpineGameObjectConfig extends Phaser.Types.GameObjects.GameObjectConfig
+{
     key?: string;
     animationName?: string;
     loop?: boolean;
