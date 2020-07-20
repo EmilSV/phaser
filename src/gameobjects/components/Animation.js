@@ -88,15 +88,6 @@ var Animation = new Class({
         this.nextAnim = null;
 
         /**
-         * A queue of keys of the next Animations to be loaded into this Animation Controller when the current animation completes.
-         *
-         * @name Phaser.GameObjects.Components.Animation#nextAnimsQueue
-         * @type {string[]}
-         * @since 3.24.0
-         */
-        this.nextAnimsQueue = [];
-
-        /**
          * Time scale factor.
          *
          * @name Phaser.GameObjects.Components.Animation#_timeScale
@@ -330,14 +321,7 @@ var Animation = new Class({
             key = key.key;
         }
 
-        if (this.nextAnim === null)
-        {
-            this.nextAnim = key;
-        }
-        else
-        {
-            this.nextAnimsQueue.push(key);
-        }
+        this.nextAnim = key;
 
         return this.parent;
     },
@@ -866,7 +850,7 @@ var Animation = new Class({
         {
             var key = this.nextAnim;
 
-            this.nextAnim = (this.nextAnimsQueue.length > 0) ? this.nextAnimsQueue.shift() : null;
+            this.nextAnim = null;
 
             this.play(key);
         }
@@ -1178,7 +1162,6 @@ var Animation = new Class({
 
         this.animationManager = null;
         this.parent = null;
-        this.nextAnimsQueue.length = 0;
 
         this.currentAnim = null;
         this.currentFrame = null;

@@ -7,7 +7,7 @@
 var Class = require('../../utils/Class');
 var Features = require('../../device/Features');
 var InputEvents = require('../events');
-var NOOP = require('../../utils/NOOP');
+var NOOP = require('../../utils/Class');
 
 //  https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent
 //  https://github.com/WICG/EventListenerOptions/blob/gh-pages/explainer.md
