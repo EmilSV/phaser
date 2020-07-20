@@ -4,6 +4,7 @@
  * @license      {@link https://opensource.org/licenses/MIT|MIT License}
  */
 
+var AngleBetweenPoints = require('../../math/angle/BetweenPoints');
 var Body = require('./Body');
 var Clamp = require('../../math/Clamp');
 var Class = require('../../utils/Class');
@@ -18,6 +19,7 @@ var FuzzyLessThan = require('../../math/fuzzy/LessThan');
 var GetOverlapX = require('./GetOverlapX');
 var GetOverlapY = require('./GetOverlapY');
 var GetValue = require('../../utils/object/GetValue');
+var MATH_CONST = require('../../math/const');
 var ProcessQueue = require('../../structs/ProcessQueue');
 var ProcessTileCallbacks = require('./tilemap/ProcessTileCallbacks');
 var Rectangle = require('../../geom/rectangle/Rectangle');
@@ -155,8 +157,8 @@ var World = new Class({
         this.fps = GetValue(config, 'fps', 60);
 
         /**
-         * Should Physics use a fixed update time-step (true) or sync to the render fps (false)?. 
-         * False value of this property disables fps and timeScale properties. 
+         * Should Physics use a fixed update time-step (true) or sync to the render fps (false)?.
+         * False value of this property disables fps and timeScale properties.
          *
          * @name Phaser.Physics.Arcade.World#fixedStep
          * @type {boolean}
@@ -326,7 +328,7 @@ var World = new Class({
         this.maxEntries = GetValue(config, 'maxEntries', 16);
 
         /**
-         * Should this Arcade Physics World use an RTree for Dynamic and Static Physics bodies?
+         * Should this Arcade Physics World use an RTree for Dynamic bodies?
          *
          * An RTree is a fast way of spatially sorting of all the bodies in the world.
          * However, at certain limits, the cost of clearing and inserting the bodies into the
@@ -1341,12 +1343,14 @@ var World = new Class({
      * @param {ArcadePhysicsCallback} [processCallback] - The process callback.
      * @param {*} [callbackContext] - The context in which to invoke the callback.
      * @param {boolean} [overlapOnly] - If this a collide or overlap check?
+     * @param {boolean} [intersects] - Assert that the bodies intersect and should not be tested before separation.
      *
      * @return {boolean} True if separation occurred, otherwise false.
      */
-    separate: function (body1, body2, processCallback, callbackContext, overlapOnly)
+    separate: function (body1, body2, processCallback, callbackContext, overlapOnly, intersects)
     {
         if (
+            !intersects &&
             !body1.enable ||
             !body2.enable ||
             body1.checkCollision.none ||
@@ -1398,8 +1402,14 @@ var World = new Class({
         var resultX = false;
         var resultY = false;
 
-        //  Do we separate on x or y first?
-        if (this.forceX || Math.abs(this.gravity.y + body1.gravity.y) < Math.abs(this.gravity.x + body1.gravity.x))
+        //  Do we separate on x first or y first or both?
+        if (overlapOnly)
+        {
+            //  No separation but we need to calculate overlapX, overlapY, etc.
+            resultX = SeparateX(body1, body2, overlapOnly, this.OVERLAP_BIAS);
+            resultY = SeparateY(body1, body2, overlapOnly, this.OVERLAP_BIAS);
+        }
+        else if (this.forceX || Math.abs(this.gravity.y + body1.gravity.y) < Math.abs(this.gravity.x + body1.gravity.x))
         {
             resultX = SeparateX(body1, body2, overlapOnly, this.OVERLAP_BIAS);
 
@@ -1457,6 +1467,9 @@ var World = new Class({
      */
     separateCircle: function (body1, body2, overlapOnly, bias)
     {
+        body1.updateCenter();
+        body2.updateCenter();
+
         //  Set the bounding box overlap values into the bodies themselves (hence we don't use the return values here)
         GetOverlapX(body1, body2, false, bias);
         GetOverlapY(body1, body2, false, bias);
@@ -1527,39 +1540,48 @@ var World = new Class({
         var ny = ((body2.center.y - body1.center.y) / d) || 0;
         var p = 2 * (body1.velocity.x * nx + body1.velocity.y * ny - body2.velocity.x * nx - body2.velocity.y * ny) / (body1.mass + body2.mass);
 
+        if (body1.immovable || body2.immovable)
+        {
+            p *= 2;
+        }
+
         if (!body1.immovable)
         {
-            body1.velocity.x = (body1.velocity.x - p * body1.mass * nx);
-            body1.velocity.y = (body1.velocity.y - p * body1.mass * ny);
+            body1.velocity.x = (body1.velocity.x - p / body1.mass * nx);
+            body1.velocity.y = (body1.velocity.y - p / body1.mass * ny);
         }
 
         if (!body2.immovable)
         {
-            body2.velocity.x = (body2.velocity.x + p * body2.mass * nx);
-            body2.velocity.y = (body2.velocity.y + p * body2.mass * ny);
+            body2.velocity.x = (body2.velocity.x + p / body2.mass * nx);
+            body2.velocity.y = (body2.velocity.y + p / body2.mass * ny);
         }
-
-        var dvx = body2.velocity.x - body1.velocity.x;
-        var dvy = body2.velocity.y - body1.velocity.y;
-        var angleCollision = Math.atan2(dvy, dvx);
-
-        var delta = this._frameTime;
 
         if (!body1.immovable && !body2.immovable)
         {
             overlap /= 2;
         }
 
+        // TODO this is inadequate for circle-rectangle separation
+
+        var angle = AngleBetweenPoints(body1.center, body2.center);
+        var overlapX = (overlap + MATH_CONST.EPSILON) * Math.cos(angle);
+        var overlapY = (overlap + MATH_CONST.EPSILON) * Math.sin(angle);
+
         if (!body1.immovable)
         {
-            body1.x += (body1.velocity.x * delta) - overlap * Math.cos(angleCollision);
-            body1.y += (body1.velocity.y * delta) - overlap * Math.sin(angleCollision);
+            body1.x -= overlapX;
+            body1.y -= overlapY;
+
+            body1.updateCenter();
         }
 
         if (!body2.immovable)
         {
-            body2.x += (body2.velocity.x * delta) + overlap * Math.cos(angleCollision);
-            body2.y += (body2.velocity.y * delta) + overlap * Math.sin(angleCollision);
+            body2.x += overlapX;
+            body2.y += overlapY;
+
+            body2.updateCenter();
         }
 
         body1.velocity.x *= body1.bounce.x;
@@ -1954,7 +1976,7 @@ var World = new Class({
         var len;
         var bodyB;
 
-        if (this.useTree)
+        if (this.useTree || group.physicsType === CONST.STATIC_BODY)
         {
             var minMax = this.treeMinMax;
 
@@ -1977,7 +1999,7 @@ var World = new Class({
                     continue;
                 }
 
-                if (this.separate(bodyA, bodyB, processCallback, callbackContext, overlapOnly))
+                if (this.separate(bodyA, bodyB, processCallback, callbackContext, overlapOnly, true))
                 {
                     if (collideCallback)
                     {
