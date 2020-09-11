@@ -73,7 +73,7 @@ var SpineContainerCanvasRenderer = function (renderer, container, interpolationP
         var childScrollFactorX = child.scrollFactorX;
         var childScrollFactorY = child.scrollFactorY;
 
-        if (!containerHasBlendMode && child.blendMode !== renderer.currentBlendMode)
+        if (!containerHasBlendMode)
         {
             //  If Container doesn't have its own blend mode, then a child can have one
             renderer.setBlendMode(child.blendMode);
