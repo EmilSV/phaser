@@ -119,7 +119,7 @@ var LightPipeline = new Class({
      * By this stage all Game level systems are now in place and you can perform any final
      * tasks that the pipeline may need that relied on game systems such as the Texture Manager.
      *
-     * @method Phaser.Renderer.WebGL.LightPipeline#boot
+     * @method Phaser.Renderer.WebGL.Pipelines.LightPipeline#boot
      * @since 3.11.0
      */
     boot: function ()
