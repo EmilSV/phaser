@@ -2643,10 +2643,23 @@ var InputPlugin = new Class({
         }
 
         var list = pointer.camera.renderList;
+        var _this = this;
 
         return gameObjects.sort(function (childA, childB)
         {
-            return list.indexOf(childB) - list.indexOf(childA);
+            var ia = list.indexOf(childA);
+            var ib = list.indexOf(childB);
+
+            if (ia === -1 || ib === -1)
+            {
+                if ((childA.input && childA.input.alwaysEnabled) ||
+                    (childB.input && childB.input.alwaysEnabled))
+                {
+                    return _this.sortDropZoneHandler(childA, childB);
+                }
+            }
+
+            return ib - ia;
         });
     },
 
